@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -40,4 +41,12 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
+
+    @GetMapping("/health")
+    public ResponseEntity<Map<String, String>> health() {
+        return ResponseEntity.ok(Map.of(
+                "status", "UP",
+                "service", "auth-service",
+                "message", "Auth service is running successfully"
+        ));}
 }

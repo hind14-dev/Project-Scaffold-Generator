@@ -63,6 +63,8 @@ pipeline {
                         '''
                     }
                 }
+
+
             }
         }
 
@@ -98,10 +100,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ Pipeline succeeded — all services deployed'
+            echo 'Pipeline succeeded — all services deployed'
         }
         failure {
-            echo '❌ Pipeline failed — check logs above , THANKSSS'
+            echo 'Pipeline failed — check logs above , THANKSSS'
         }
         always {
             sh 'docker logout'

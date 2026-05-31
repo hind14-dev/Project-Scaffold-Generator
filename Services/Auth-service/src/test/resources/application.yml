@@ -2,6 +2,7 @@ spring:
   cloud:
     config:
       enabled: false
+      token: myroot
     vault:
       enabled: false
   config:
