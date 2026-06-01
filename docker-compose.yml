@@ -10,38 +10,7 @@ services:
       SKIP_SETCAP: "true"
     command: vault server -dev
 
-  config-service:
-    build: ./Services/ConfigService
-    container_name: config-service
-    ports:
-      - "8888:8888"
-    environment:
-      VAULT_HOST: vault
-      VAULT_PORT: 8200
-      VAULT_TOKEN: myroot
-    healthcheck:
-      test: [ "CMD", "wget", "-qO-", "http://localhost:8888/actuator/health" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 40s
-    depends_on:
-      - vault
 
-  discovery-service:
-    build: ./Services/discoveryService
-    container_name: discovery-service
-    ports:
-      - "8761:8761"
-    healthcheck:
-      test: [ "CMD", "wget", "-qO-", "http://localhost:8761/actuator/health" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 40s
-    depends_on:
-      - vault
-      - config-service
 
   generate-project-service:
     build: ./Services/GenerateProjectService
@@ -140,6 +109,39 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
+
+  config-service:
+    build: ./Services/ConfigService
+    container_name: config-service
+    ports:
+      - "8888:8888"
+    environment:
+      VAULT_HOST: vault
+      VAULT_PORT: 8200
+      VAULT_TOKEN: myroot
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:8888/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    depends_on:
+      - vault
+
+  discovery-service:
+    build: ./Services/discoveryService
+    container_name: discovery-service
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:8761/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    depends_on:
+      - vault
+      - config-service
 
   auth-service:
     build: ./Services/Auth-service
