@@ -8,6 +8,7 @@ class GenerateProjectServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
+		
 	}
 
 }

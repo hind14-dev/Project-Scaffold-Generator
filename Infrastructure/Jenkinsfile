@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        VAULT_TOKEN     = credentials('vaultToken')
-        DOCKER_REGISTRY = 'saada9bib'
+        DOCKER_REGISTRY = 'hindelatache'
+        VAULT_TOKEN = credentials('vaultToken')
     }
 
     stages {
@@ -14,13 +14,13 @@ pipeline {
             }
         }
 
-        stage('Build All Services') {
+        stage('Build All Services (Maven)') {
             steps {
                 sh 'mvn clean package -DskipTests'
             }
         }
 
-        stage('Test All Services') {
+        stage('Unit Tests') {
             steps {
                 sh 'mvn test'
             }
@@ -33,66 +33,104 @@ pipeline {
 
         stage('Docker Build') {
             parallel {
-                stage('Build discovery-service') {
+
+                stage('Api Gateway') {
                     steps {
                         sh '''
-                            docker build \
-                            -t ${DOCKER_REGISTRY}/discovery-service:${BUILD_NUMBER} \
-                            -t ${DOCKER_REGISTRY}/discovery-service:latest \
-                            ./Services/discoveryService
-                        '''
-                    }
-                }
-                stage('Build config-service') {
-                    steps {
-                        sh '''
-                            docker build \
-                            -t ${DOCKER_REGISTRY}/config-service:${BUILD_NUMBER} \
-                            -t ${DOCKER_REGISTRY}/config-service:latest \
-                            ./Services/ConfigService
-                        '''
-                    }
-                }
-                stage('Build generate-project-service') {
-                    steps {
-                        sh '''
-                            docker build \
-                            -t ${DOCKER_REGISTRY}/generate-project-service:${BUILD_NUMBER} \
-                            -t ${DOCKER_REGISTRY}/generate-project-service:latest \
-                            ./Services/GenerateProjectService
+                        docker build \
+                        -t ${DOCKER_REGISTRY}/apigateway:${BUILD_NUMBER} \
+                        -t ${DOCKER_REGISTRY}/apigateway:latest \
+                        ./Services/ApiGateway
                         '''
                     }
                 }
 
+                stage('Auth Service') {
+                    steps {
+                        sh '''
+                        docker build \
+                        -t ${DOCKER_REGISTRY}/auth-service:${BUILD_NUMBER} \
+                        -t ${DOCKER_REGISTRY}/auth-service:latest \
+                        ./Services/Auth-service
+                        '''
+                    }
+                }
 
+                stage('Config Service') {
+                    steps {
+                        sh '''
+                        docker build \
+                        -t ${DOCKER_REGISTRY}/config-service:${BUILD_NUMBER} \
+                        -t ${DOCKER_REGISTRY}/config-service:latest \
+                        ./Services/ConfigService
+                        '''
+                    }
+                }
+
+                stage('Discovery Service') {
+                    steps {
+                        sh '''
+                        docker build \
+                        -t ${DOCKER_REGISTRY}/discovery-service:${BUILD_NUMBER} \
+                        -t ${DOCKER_REGISTRY}/discovery-service:latest \
+                        ./Services/discoveryService
+                        '''
+                    }
+                }
+
+                stage('Generate Project Service') {
+                    steps {
+                        sh '''
+                        docker build \
+                        -t ${DOCKER_REGISTRY}/generateproject-service:${BUILD_NUMBER} \
+                        -t ${DOCKER_REGISTRY}/generateproject-service:latest \
+                        ./Services/GenerateProjectService
+                        '''
+                    }
+                }
             }
         }
 
-        stage('Docker Push') {
+        stage('Docker Push to DockerHub') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhubCredentials',
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
+
                     sh '''
-                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                        docker push ${DOCKER_REGISTRY}/discovery-service:${BUILD_NUMBER}
-                        docker push ${DOCKER_REGISTRY}/discovery-service:latest
-                        docker push ${DOCKER_REGISTRY}/config-service:${BUILD_NUMBER}
-                        docker push ${DOCKER_REGISTRY}/config-service:latest
-                        docker push ${DOCKER_REGISTRY}/generate-project-service:${BUILD_NUMBER}
-                        docker push ${DOCKER_REGISTRY}/generate-project-service:latest
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+
+                    docker push ${DOCKER_REGISTRY}/apigateway:${BUILD_NUMBER}
+                    docker push ${DOCKER_REGISTRY}/apigateway:latest
+
+                    docker push ${DOCKER_REGISTRY}/auth-service:${BUILD_NUMBER}
+                    docker push ${DOCKER_REGISTRY}/auth-service:latest
+
+                    docker push ${DOCKER_REGISTRY}/config-service:${BUILD_NUMBER}
+                    docker push ${DOCKER_REGISTRY}/config-service:latest
+
+                    docker push ${DOCKER_REGISTRY}/discovery-service:${BUILD_NUMBER}
+                    docker push ${DOCKER_REGISTRY}/discovery-service:latest
+
+                    docker push ${DOCKER_REGISTRY}/generateproject-service:${BUILD_NUMBER}
+                    docker push ${DOCKER_REGISTRY}/generateproject-service:latest
                     '''
                 }
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to Kubernetes (K3s)') {
             steps {
                 sh '''
-                    docker compose -f docker-compose.yml down
-                    docker compose -f docker-compose.yml up -d --build
+                kubectl apply -f k8s/
+
+                kubectl rollout restart deployment apigateway
+                kubectl rollout restart deployment auth-service
+                kubectl rollout restart deployment config-service
+                kubectl rollout restart deployment discovery-service
+                kubectl rollout restart deployment generateproject-service
                 '''
             }
         }
@@ -100,11 +138,13 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline succeeded — all services deployed'
+            echo '🚀 SUCCESS: Full CI/CD pipeline completed (DockerHub + Kubernetes + Vault)'
         }
+
         failure {
-            echo 'Pipeline failed — check logs above , THANKSSS'
+            echo '❌ FAILED: Check logs'
         }
+
         always {
             sh 'docker logout'
         }
