@@ -25,11 +25,11 @@ pipeline {
         sh 'mvn test -Dspring.profiles.active=test'
     }
 
-    post {
-        always {
-            junit '**/target/surefire-reports/*.xml'
-        }
-    }
+    //post {
+      //  always {
+      //      junit '**/target/surefire-reports/*.xml'
+     //   }
+   // }
 }
 
         stage('Docker Build') {
@@ -62,7 +62,7 @@ pipeline {
                         sh '''
                         docker build \
                         -t ${DOCKER_REGISTRY}/config-service:${BUILD_NUMBER} \
-                        -t ${DOCKER_REGISTRY}/config-service:latest \
+                        -t ${DOCKER_REGISTRY}/configservice:latest \
                         ./Services/ConfigService
                         '''
                     }
@@ -112,8 +112,8 @@ pipeline {
                     docker push ${DOCKER_REGISTRY}/config-service:${BUILD_NUMBER}
                     docker push ${DOCKER_REGISTRY}/config-service:latest
 
-                    docker push ${DOCKER_REGISTRY}/discovery-service:${BUILD_NUMBER}
-                    docker push ${DOCKER_REGISTRY}/discovery-service:latest
+                    docker push ${DOCKER_REGISTRY}/discoveryservice:${BUILD_NUMBER}
+                    docker push ${DOCKER_REGISTRY}/discoveryservice:latest
 
                     docker push ${DOCKER_REGISTRY}/generateproject-service:${BUILD_NUMBER}
                     docker push ${DOCKER_REGISTRY}/generateproject-service:latest
