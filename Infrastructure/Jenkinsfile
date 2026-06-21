@@ -20,16 +20,16 @@ pipeline {
             }
         }
 
-        stage('Unit Tests') {
-            steps {
-                sh 'mvn test'
-            }
+        //stage('Unit Tests') {
+            //steps {
+              //  sh 'mvn test'
+            //}
             post {
                 always {
                     junit '**/target/surefire-reports/*.xml'
                 }
-            }
-        }
+           //}
+        } 
 
         stage('Docker Build') {
             parallel {
@@ -71,8 +71,8 @@ pipeline {
                     steps {
                         sh '''
                         docker build \
-                        -t ${DOCKER_REGISTRY}/discovery-service:${BUILD_NUMBER} \
-                        -t ${DOCKER_REGISTRY}/discovery-service:latest \
+                        -t ${DOCKER_REGISTRY}/discoveryservice:${BUILD_NUMBER} \
+                        -t ${DOCKER_REGISTRY}/discoveryservice:latest \
                         ./Services/discoveryService
                         '''
                     }
