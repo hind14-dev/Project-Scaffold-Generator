@@ -127,7 +127,7 @@ pipeline {
 
     post {
         success {
-            echo '🚀 SUCCESS: Full CI/CD pipeline completed (DockerHub + Kubernetes + Vault)'
+            echo 'SUCCESS: Full CI/CD pipeline completed (DockerHub + Kubernetes + Vault)'
         }
 
         failure {
