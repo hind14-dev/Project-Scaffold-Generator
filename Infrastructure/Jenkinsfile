@@ -50,7 +50,7 @@ pipeline {
                         sh '''
                         docker build \
                         -t ${DOCKER_REGISTRY}/config-service:${BUILD_NUMBER} \
-                        -t ${DOCKER_REGISTRY}/config-service:latest \
+                        -t ${DOCKER_REGISTRY}/configservice:latest \
                         ./Services/ConfigService
                         '''
                     }
@@ -98,7 +98,7 @@ pipeline {
                     docker push ${DOCKER_REGISTRY}/auth-service:latest
 
                     docker push ${DOCKER_REGISTRY}/config-service:${BUILD_NUMBER}
-                    docker push ${DOCKER_REGISTRY}/config-service:latest
+                    docker push ${DOCKER_REGISTRY}/configservice:latest
 
                     docker push ${DOCKER_REGISTRY}/discoveryservice:${BUILD_NUMBER}
                     docker push ${DOCKER_REGISTRY}/discoveryservice:latest
