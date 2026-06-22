@@ -50,7 +50,7 @@ pipeline {
                         sh '''
                         docker build \
                         -t ${DOCKER_REGISTRY}/config-service:${BUILD_NUMBER} \
-                        -t ${DOCKER_REGISTRY}/configservice:latest \
+                        -t ${DOCKER_REGISTRY}/config-service:latest \
                         ./Services/ConfigService
                         '''
                     }
