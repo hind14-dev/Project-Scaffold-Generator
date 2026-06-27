@@ -16,4 +16,4 @@ spec:
         - name: apigateway
           image: hindelatache/apigateway:latest
           ports:
-            - containerPort: 8080
+            - containerPort: 8080 

@@ -13,8 +13,8 @@ spring:
   cloud:
     vault: # ← ADD THIS BLOCK
       authentication: TOKEN
-      token: ${VAULT_TOKEN:myroot}
-      host: ${VAULT_HOST:localhost}
+      token: ${VAULT_TOKEN:root} #changer myroot to root 
+      host: ${VAULT_HOST:localhost} #change from localhost to private ip of preprod
       port: ${VAULT_PORT:8200}
       scheme: http
       kv:
